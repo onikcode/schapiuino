@@ -3,7 +3,7 @@
   Created by Joan Ortega, jomaora@gmail.com Feb. 15, 2016.
   Released into the public domain.
 */
-  
+
 #ifndef Request_h
 #define Request_h
 
@@ -13,12 +13,14 @@
 class Request
 {
     public:
-        Request(EthernetClient & client, bool requestSent = false){
+        Request(EthernetClient & client, char* server, int serverPort, bool requestSent = false){
         	client_ = client;
+        	server_ = server;
+        	serverPort_ = serverPort_;
         	requestSent_ = requestSent;
         }
 
-        bool send() const;
+        bool send();
         void get();
         void post();
 
@@ -26,8 +28,13 @@ class Request
     	void readingResponse(char n);
 
     	EthernetClient client_;
+    	char* server_;
+    	int serverPort_;
     	
     	bool requestSent_;
+    	bool readingStatus = false;
+    	bool readingheaders = false;
+    	bool readingBody = false;
 
     	/*Variables to store response from API*/
     	String status = "";

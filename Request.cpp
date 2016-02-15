@@ -67,14 +67,16 @@ void Request::readingResponse(char c) {
   }
 }
 
-void request() {
+bool Request::send() {
   headers = "";
   body = "";
   returnCharCount = 0;
   
   int connected = 0;
+  Serial.println(server_);
+  Serial.println(serverPort_);
   while (!connected) {
-    if (client_.connect(server, 80)) {
+    if (client_.connect(server_, serverPort_)) {
       Serial.println("connected");
       connected = 1;
     } 
@@ -92,7 +94,7 @@ void request() {
 
   bool receivedResponse = false;
   while(!receivedResponse) {
-    char c = client.read();
+    char c = client_.read();
     readingResponse(c);
     // lecture de la reponse
     if (!client_.available() && !client_.connected()) {
