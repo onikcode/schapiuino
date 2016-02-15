@@ -16,7 +16,7 @@ class Request
         Request(EthernetClient & client, char* server, int serverPort, bool requestSent = false){
         	client_ = client;
         	server_ = server;
-        	serverPort_ = serverPort_;
+        	serverPort_ = serverPort;
         	requestSent_ = requestSent;
         }
 

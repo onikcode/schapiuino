@@ -99,6 +99,16 @@ bool Request::send() {
     // lecture de la reponse
     if (!client_.available() && !client_.connected()) {
       receivedResponse = true;
+      Serial.println("disconnecting.");
+      Serial.println("");
+      Serial.println("status");
+      Serial.println(status);
+      Serial.println("");
+      Serial.print("headers");
+      Serial.print(headers);
+      Serial.println("");
+      Serial.print("body");
+      Serial.print(body);
     }
   }
 
