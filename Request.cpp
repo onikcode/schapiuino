@@ -66,6 +66,17 @@ void Request::send() {
     _client->println();
 
     buildResponse();
+
+    Serial.println("disconnecting.");
+    Serial.println("");
+    Serial.println("status");
+    Serial.println(_status);
+    Serial.println("");
+    Serial.print("headers");
+    Serial.print(_responseHeaders);
+    Serial.println("");
+    Serial.print("body");
+    Serial.print(_body);
   }
 }
 
