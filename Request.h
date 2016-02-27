@@ -25,18 +25,17 @@ class Request
         String  init();
         bool    initRequest(String httpMethod, char *server, int severPort, String path);
         void    addHeader(String header);
-        String  send();
+        const char* send();
         
         void    setPath(String path){ _path = path; }
         String  getPath() { return _path; }
-        String  getResponseBody() { return _body; }
-        String  getResponseStatus() { return _status; }
+        int     getResponseStatusCode();
 
         void    enableLogs() { _activeLogs = true; }
         void    disableLogs() { _activeLogs = false; }
 
     private:
-    	void readingResponse(char n);
+      void readingResponse(char n);
       void buildResponse();
 
     	EthernetClient *_client;
@@ -49,6 +48,7 @@ class Request
       String _headers[];
 
       bool _requestReady = false;
+      bool _receivedResponse = false;
 
     	bool _requestSent;
     	bool _readingStatus = false;

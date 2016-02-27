@@ -30,6 +30,7 @@ String Request::init() {
 bool Request::initRequest(String httpMethod, char *server, int serverPort, String path) {
   _server = server;
   _path = path;
+  _receivedResponse = false;  // setting the flag that indicates the response recpetion to false;
 
   int connected = 0;
   while (!connected) {
@@ -62,7 +63,7 @@ void Request::addHeader(String header) {
   }
 }
 
-String Request::send() {
+const char* Request::send() {
   if (_requestReady) {
     _client->println("Connection: close");
     _client->println();
@@ -81,8 +82,7 @@ String Request::send() {
       Serial.print("body");
       Serial.println(_body);
     }
-
-    return _body;
+    return _body.c_str();
   }
   else {
     return "Request is not ready";
@@ -90,15 +90,15 @@ String Request::send() {
 }
 
 void Request::buildResponse() {
-  bool receivedResponse = false;
-  _returnCharCount = 0;
-  while(!receivedResponse) {
+  // values needed before reading response
+  _returnCharCount = 0; _readingStatus = true;  _readingheaders = false;  _readingBody = false;
+  while(!_receivedResponse) {
     if (_client->available()) {
       char c = _client->read();
       readingResponse(c);
     }
     if (!_client->available() && !_client->connected()) {
-      receivedResponse = true;
+      _receivedResponse = true;
     }
   }
 }
@@ -106,11 +106,10 @@ void Request::buildResponse() {
 void Request::readingResponse(char c) {
   if (c == '\n' || c == '\r') {
     _returnCharCount++;
+  } else {
+    _returnCharCount = 0;
   }
 
-  if (_returnCharCount < 2) {
-    _readingStatus = true;  _readingheaders = false;  _readingBody = false;
-  }
   if (_returnCharCount == 2) {
     _readingStatus = false; _readingheaders = true;   _readingBody = false;
   }
@@ -121,10 +120,20 @@ void Request::readingResponse(char c) {
   if (_readingStatus) {
     _status.concat(c);
   }
-  if (_readingBody) {
+  if (_readingBody && c != '\n') {
     _body.concat(c);
   } 
   if (_readingheaders) {
     _responseHeaders.concat(c);  
+  }
+}
+
+int Request::getResponseStatusCode() {
+  if (_receivedResponse) {
+    int blankSpaceIndex = _status.indexOf(" ") + 1;
+    String statusCode = _status.substring(blankSpaceIndex, blankSpaceIndex + 3);
+    return statusCode.toInt();  
+  } else {
+    return 0;
   }
 }

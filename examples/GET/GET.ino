@@ -10,6 +10,7 @@ Request request(&client, mac, ip);
 int pinIn = 6;
 int currentState = LOW;
 int readState = LOW;
+bool requestReady = false;
 
 void setup() {
   Serial.begin(9600);
@@ -20,8 +21,17 @@ void setup() {
 void loop() {
   readState = digitalRead(pinIn);
   if (currentState != readState) {
-    request.initRequest("GET", "jomaora-restapi.herokuapp.com", 80, "/reviews");
-    request.addHeader("Accept: text/plain");
-    request.send();
+    //request.enableLogs();
+    requestReady = request.initRequest("GET", "jomaora-restapi.herokuapp.com", 80, "/reviews");
+    if (requestReady) {
+      request.addHeader("Accept: text/plain");
+      const char* response = request.send();
+      Serial.print("API Response : ");
+      Serial.println(response);
+      Serial.println(request.getResponseStatusCode());
+    }
+    else {
+      Serial.println("Error during set up request.");
+    }
   }
 }
