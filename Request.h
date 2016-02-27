@@ -23,7 +23,7 @@ class Request
         }
 
         String  init();
-        void    initRequest(String httpMethod, char *server, int severPort, String path);
+        bool    initRequest(String httpMethod, char *server, int severPort, String path);
         void    addHeader(String header);
         void    send();
         
