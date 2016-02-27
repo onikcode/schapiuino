@@ -62,31 +62,41 @@ void Request::addHeader(String header) {
   }
 }
 
-void Request::send() {
+String Request::send() {
   if (_requestReady) {
     _client->println("Connection: close");
     _client->println();
 
     buildResponse();
 
-    Serial.println("disconnecting.");
-    Serial.println("");
-    Serial.println("status");
-    Serial.println(_status);
-    Serial.println("");
-    Serial.print("headers");
-    Serial.print(_responseHeaders);
-    Serial.println("");
-    Serial.print("body");
-    Serial.print(_body);
+    if (_activeLogs) {
+      Serial.println("disconnecting.");
+      Serial.println("");
+      Serial.println("status");
+      Serial.println(_status);
+      Serial.println("");
+      Serial.print("headers");
+      Serial.print(_responseHeaders);
+      Serial.println("");
+      Serial.print("body");
+      Serial.println(_body);
+    }
+
+    return _body;
+  }
+  else {
+    return "Request is not ready";
   }
 }
 
 void Request::buildResponse() {
   bool receivedResponse = false;
+  _returnCharCount = 0;
   while(!receivedResponse) {
-    char c = _client->read();
-    readingResponse(c);
+    if (_client->available()) {
+      char c = _client->read();
+      readingResponse(c);
+    }
     if (!_client->available() && !_client->connected()) {
       receivedResponse = true;
     }
@@ -96,19 +106,16 @@ void Request::buildResponse() {
 void Request::readingResponse(char c) {
   if (c == '\n' || c == '\r') {
     _returnCharCount++;
-  } else {
-    _returnCharCount = 0;
   }
 
+  if (_returnCharCount < 2) {
+    _readingStatus = true;  _readingheaders = false;  _readingBody = false;
+  }
   if (_returnCharCount == 2) {
-    _readingStatus = false;
-    _readingheaders = true;
-    _readingBody = false;
+    _readingStatus = false; _readingheaders = true;   _readingBody = false;
   }
   if (_returnCharCount == 4) {
-    _readingStatus = false;
-    _readingheaders = false;
-    _readingBody = true;
+    _readingStatus = false; _readingheaders = false;  _readingBody = true;
   }
   
   if (_readingStatus) {

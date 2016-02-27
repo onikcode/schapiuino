@@ -25,10 +25,15 @@ class Request
         String  init();
         bool    initRequest(String httpMethod, char *server, int severPort, String path);
         void    addHeader(String header);
-        void    send();
+        String  send();
         
         void    setPath(String path){ _path = path; }
         String  getPath() { return _path; }
+        String  getResponseBody() { return _body; }
+        String  getResponseStatus() { return _status; }
+
+        void    enableLogs() { _activeLogs = true; }
+        void    disableLogs() { _activeLogs = false; }
 
     private:
     	void readingResponse(char n);
@@ -57,5 +62,7 @@ class Request
 
   		/*Counter on \n and \r characters sent by the API in the response, to identify which element have been read*/
 		  int _returnCharCount = 0;
+
+      bool  _activeLogs = false;
 };
 #endif
