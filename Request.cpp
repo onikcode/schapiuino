@@ -8,7 +8,7 @@
 #include <Ethernet.h>
 #include "Request.h"
 
-String Request::init() {
+bool Request::init() {
   _requestReady = false;
   String result = "";
   Serial.begin(9600);
@@ -16,7 +16,8 @@ String Request::init() {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
 
-  if (Ethernet.begin(_mac) == 0) {
+  int beginOK = Ethernet.begin(_mac);
+  if (beginOK == 0) {
     result = "Failed to configure Ethernet using DHCP";
     Serial.println(result);
     Ethernet.begin(_mac, _ip);
@@ -24,13 +25,13 @@ String Request::init() {
   delay(1000);
   result = "Ethernet Shield connected";
   Serial.println(result);
-  return result;
+  return (beginOK != 0);
 }
 
 bool Request::initRequest(String httpMethod, char *server, int serverPort, String path) {
   _server = server;
   _path = path;
-  _receivedResponse = false;  // setting the flag that indicates the response recpetion to false;
+  resetRequest();
 
   int connected = 0;
   while (!connected) {
@@ -147,4 +148,11 @@ const char* Request::getResponseBody() {
   } else {
     return "";
   }
+}
+
+void Request::resetRequest() {
+  _receivedResponse = false;  // setting the flag that indicates the response recpetion to false;
+  _body = "";
+  _status = "";
+  _responseHeaders = "";
 }
