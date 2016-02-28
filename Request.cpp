@@ -82,6 +82,9 @@ const char* Request::send() {
       Serial.print("body");
       Serial.println(_body);
     }
+
+    _client->stop();
+
     return _body.c_str();
   }
   else {
@@ -135,5 +138,13 @@ int Request::getResponseStatusCode() {
     return statusCode.toInt();  
   } else {
     return 0;
+  }
+}
+
+const char* Request::getResponseBody() {
+  if (_receivedResponse) {
+    return _body.c_str();  
+  } else {
+    return "";
   }
 }

@@ -30,6 +30,7 @@ class Request
         void    setPath(String path){ _path = path; }
         String  getPath() { return _path; }
         int     getResponseStatusCode();
+        const char* getResponseBody();
 
         void    enableLogs() { _activeLogs = true; }
         void    disableLogs() { _activeLogs = false; }
