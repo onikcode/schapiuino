@@ -7,42 +7,63 @@
 #ifndef Request_h
 #define Request_h
 
-#include <Ethernet.h>
 #include "Arduino.h"
+#include <Ethernet.h>
 
 class Request
 {
     public:
-        Request(EthernetClient & client, char* server, int serverPort, bool requestSent = false){
-        	client_ = client;
-        	server_ = server;
-        	serverPort_ = serverPort;
-        	requestSent_ = requestSent;
+        Request(EthernetClient *client, byte mac[], int ipRanges[]){
+        	_client = client;
+          for (int i = 0; i < 6; i++) {
+            _mac[i] = mac[i];  
+          }
+          _ip = IPAddress(ipRanges[0], ipRanges[1], ipRanges[2], ipRanges[3]);
+          _requestReady = false;
         }
 
-        bool send();
-        void get();
-        void post();
+        String  init();
+        bool    initRequest(String httpMethod, char *server, int severPort, String path);
+        void    addHeader(String header);
+        const char* send();
+        
+        void    setPath(String path){ _path = path; }
+        String  getPath() { return _path; }
+        int     getResponseStatusCode();
+        const char* getResponseBody();
+
+        void    enableLogs() { _activeLogs = true; }
+        void    disableLogs() { _activeLogs = false; }
 
     private:
-    	void readingResponse(char n);
+      void readingResponse(char n);
+      void buildResponse();
 
-    	EthernetClient client_;
-    	char* server_;
-    	int serverPort_;
-    	
-    	bool requestSent_;
-    	bool readingStatus = false;
-    	bool readingheaders = false;
-    	bool readingBody = false;
+    	EthernetClient *_client;
+      byte _mac[6];
+      IPAddress _ip;
+
+    	char*  _server;
+      int    _serverPort;
+      String _path;
+      String _headers[];
+
+      bool _requestReady = false;
+      bool _receivedResponse = false;
+
+    	bool _requestSent;
+    	bool _readingStatus = false;
+    	bool _readingheaders = false;
+    	bool _readingBody = false;
 
     	/*Variables to store response from API*/
-    	String status = "";
-  		String headers = "";
-  		String body = "";
+    	String _status = "";
+  		String _body = "";
+      String _responseHeaders = "";
 
   		/*Counter on \n and \r characters sent by the API in the response, to identify which element have been read*/
-		int returnCharCount = 0;
+		  int _returnCharCount = 0;
 
+      bool  _activeLogs = false;
 };
 #endif

@@ -5,112 +5,146 @@
 */
 
 #include "Arduino.h"
+#include <Ethernet.h>
 #include "Request.h"
 
-void Request::get() {
-  client_.println("GET /reviews HTTP/1.1");
-  client_.println("Host: jomaora-restapi.herokuapp.com");
-  client_.println("Accept: text/plain");
-  client_.println("Connection: close");
-  client_.println();  
+String Request::init() {
+  _requestReady = false;
+  String result = "";
+  Serial.begin(9600);
+   while (!Serial) {
+    ; // wait for serial port to connect. Needed for Leonardo only
+  }
+
+  if (Ethernet.begin(_mac) == 0) {
+    result = "Failed to configure Ethernet using DHCP";
+    Serial.println(result);
+    Ethernet.begin(_mac, _ip);
+  }
+  delay(1000);
+  result = "Ethernet Shield connected";
+  Serial.println(result);
+  return result;
 }
 
-void Request::post() {
-  String PostData="{\"name\":\"test-arduino-depuis-ekino\",";
-  PostData=PostData+"\"placeType\":\"ekino\",";
-  PostData=PostData+"\"stars\":3";
-  PostData=PostData+"}";
-  
-  client_.println("POST /reviews HTTP/1.1");
-  client_.println("Host: jomaora-restapi.herokuapp.com");
-  client_.println("Accept: application/json");
-  client_.println("User-Agent: Arduino/1.0");
-  client_.println("Content-Type: application/json");
-  client_.println("Connection: close");
-  client_.print("Content-Length: ");
-  client_.println(PostData.length());
-  client_.println();
-  client_.println(PostData);
-}
+bool Request::initRequest(String httpMethod, char *server, int serverPort, String path) {
+  _server = server;
+  _path = path;
+  _receivedResponse = false;  // setting the flag that indicates the response recpetion to false;
 
-
-void Request::readingResponse(char c) {
-  if (c == '\n' || c == '\r') {
-    returnCharCount++;
-  } else {
-    returnCharCount = 0;
-  }
-  /*Serial.print(c);
-  Serial.print(returnCharCount);
-  Serial.print(readingheaders);
-  Serial.println(readingBody);
-  */
-  if (returnCharCount == 2) {
-    readingStatus = false;
-    readingheaders = true;
-    readingBody = false;
-  }
-  if (returnCharCount == 4) {
-    readingStatus = false;
-    readingheaders = false;
-    readingBody = true;
-  }
-  
-  if (readingStatus) {
-    status.concat(c);
-  }
-  if (readingBody) {
-    body.concat(c);
-  } 
-  if (readingheaders) {
-    headers.concat(c);  
-  }
-}
-
-bool Request::send() {
-  headers = "";
-  body = "";
-  returnCharCount = 0;
-  
   int connected = 0;
-  Serial.println(server_);
-  Serial.println(serverPort_);
   while (!connected) {
-    if (client_.connect(server_, serverPort_)) {
+    Serial.println("Trying connection");
+    if (_client->connect(_server, serverPort)) {
       Serial.println("connected");
       connected = 1;
     } 
     else {
       Serial.println("connection failed");
+      _requestReady = false;
+      return _requestReady;
     }
   }
-  
-  Serial.println("Sending request");
-  get();
-  //post();
-  delay(1000);
-  
-  requestSent_ = true;
 
-  bool receivedResponse = false;
-  while(!receivedResponse) {
-    char c = client_.read();
-    readingResponse(c);
-    // lecture de la reponse
-    if (!client_.available() && !client_.connected()) {
-      receivedResponse = true;
+  String requestLine = httpMethod + " ";
+  requestLine.concat(path);
+  requestLine.concat(" HTTP/1.1");
+  String hostLine = "Host: " + String(server);
+  _client->println(requestLine);
+  _client->println(hostLine);
+
+  _requestReady = true;
+  return _requestReady;
+}
+
+void Request::addHeader(String header) {
+  if (_requestReady) {
+    _client->println(header);  
+  }
+}
+
+const char* Request::send() {
+  if (_requestReady) {
+    _client->println("Connection: close");
+    _client->println();
+
+    buildResponse();
+
+    if (_activeLogs) {
       Serial.println("disconnecting.");
       Serial.println("");
       Serial.println("status");
-      Serial.println(status);
+      Serial.println(_status);
       Serial.println("");
       Serial.print("headers");
-      Serial.print(headers);
+      Serial.print(_responseHeaders);
       Serial.println("");
       Serial.print("body");
-      Serial.print(body);
+      Serial.println(_body);
+    }
+
+    _client->stop();
+
+    return _body.c_str();
+  }
+  else {
+    return "Request is not ready";
+  }
+}
+
+void Request::buildResponse() {
+  // values needed before reading response
+  _returnCharCount = 0; _readingStatus = true;  _readingheaders = false;  _readingBody = false;
+  while(!_receivedResponse) {
+    if (_client->available()) {
+      char c = _client->read();
+      readingResponse(c);
+    }
+    if (!_client->available() && !_client->connected()) {
+      _receivedResponse = true;
     }
   }
+}
 
-  return requestSent_;
+void Request::readingResponse(char c) {
+  if (c == '\n' || c == '\r') {
+    _returnCharCount++;
+  } else {
+    _returnCharCount = 0;
+  }
+
+  if (_returnCharCount == 2) {
+    _readingStatus = false; _readingheaders = true;   _readingBody = false;
+  }
+  if (_returnCharCount == 4) {
+    _readingStatus = false; _readingheaders = false;  _readingBody = true;
+  }
+  
+  if (_readingStatus) {
+    _status.concat(c);
+  }
+  if (_readingBody && c != '\n') {
+    _body.concat(c);
+  } 
+  if (_readingheaders) {
+    _responseHeaders.concat(c);  
+  }
+}
+
+int Request::getResponseStatusCode() {
+  if (_receivedResponse) {
+    int blankSpaceIndex = _status.indexOf(" ") + 1;
+    String statusCode = _status.substring(blankSpaceIndex, blankSpaceIndex + 3);
+    return statusCode.toInt();  
+  } else {
+    return 0;
+  }
+}
+
+const char* Request::getResponseBody() {
+  if (_receivedResponse) {
+    return _body.c_str();  
+  } else {
+    return "";
+  }
 }

@@ -1,4 +1,11 @@
 Request	KEYWORD1
+init	KEYWORD2
+initRequest	KEYWORD2
+addHeader	KEYWORD2
 send	KEYWORD2
-get	KEYWORD2
-post	KEYWORD2
+setPath	KEYWORD2
+getPath	KEYWORD2
+getResponseStatusCode	KEYWORD2
+getResponseBody	KEYWORD2
+enableLogs	KEYWORD2
+disableLogs	KEYWORD2

@@ -2,45 +2,36 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
-byte mac[] = { 0x00, 0xAA, 0xBB, 0xCC, 0xDE, 0x02 };
-IPAddress ip(192,168,1,177);
 EthernetClient client;
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+int ip[] = {192, 168, 1, 177};
+Request request(&client, mac, ip);
 
-int switchState = 0;
-bool response = false;
-
-void initEthernet() {
-  Serial.begin(9600);
-   while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo only
-  }
-
-  if (Ethernet.begin(mac) == 0) {
-    Serial.println("Failed to configure Ethernet using DHCP");
-    Ethernet.begin(mac, ip);
-  }
-  delay(1000);
-  Serial.println("Ethernet Shield connected");
-}
+int pinIn = 6;
+int currentState = LOW;
+int readState = LOW;
+bool requestReady = false;
 
 void setup() {
-  pinMode(2, INPUT);
-  pinMode(3, OUTPUT);
-  initEthernet();
+  Serial.begin(9600);
+  pinMode(pinIn, INPUT);
+  request.init();
 }
 
 void loop() {
-  switchState = digitalRead(2);
-  if (switchState == HIGH) {
-    digitalWrite(3, HIGH);
-    Request request = Request(client, "jomaora-restapi.herokuapp.com", 80);
-    response = request.send();
-  }
-  
-  if (response) {
-    Serial.print("Response received");
-    digitalWrite(3, LOW);    
-    client.stop();
-    response = false;
+  readState = digitalRead(pinIn);
+  if (currentState != readState) {
+    //request.enableLogs();
+    requestReady = request.initRequest("GET", "jomaora-restapi.herokuapp.com", 80, "/reviews");
+    if (requestReady) {
+      request.addHeader("Accept: text/plain");
+      const char* response = request.send();
+      Serial.print("API Response : ");
+      Serial.println(response);
+      Serial.println(request.getResponseStatusCode());
+    }
+    else {
+      Serial.println("Error during set up request.");
+    }
   }
 }
