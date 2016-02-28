@@ -22,7 +22,7 @@ class Request
           _requestReady = false;
         }
 
-        String  init();
+        bool    init();
         bool    initRequest(String httpMethod, char *server, int severPort, String path);
         void    addHeader(String header);
         const char* send();
@@ -38,6 +38,7 @@ class Request
     private:
       void readingResponse(char n);
       void buildResponse();
+      void resetRequest();
 
     	EthernetClient *_client;
       byte _mac[6];

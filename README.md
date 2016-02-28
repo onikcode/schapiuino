@@ -20,7 +20,7 @@ To init a Request object, you need to specifiy
 * **mac**: Mac address to be used by the EthernetShield
 * **ip**: Array containing the ranges to set the IP for the EthernetShield; Exemple [192, 0, 0, 1]
 
-### String  init()
+### bool  init()
 To be used within the setup function. It initialises the EthernetShield with the values passed in the constructor
 
 ### bool    initRequest(String httpMethod, char *server, int severPort, String path)
