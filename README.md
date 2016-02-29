@@ -7,14 +7,14 @@ It wrappes Ethernet setup, begin, connect, and send/receive request/response.
 
 ## Contents
 
-- Request.h: the Request Class definition file.
-- Request.cpp: Request Class implementation file
-- examples: 
+- ClientHandler.h: the Request Class definition file.
+- ClientHandler.cpp: Request Class implementation file
+- examples:
 	- GET: a basic example making a GET to a defined serverUrl, path, using header Accept: text/plain.
 
 ## API
 
-### Request(EthernetClient *client, byte mac[], int ipRanges[]) - Constructor
+### ClientHandler(EthernetClient *client, byte mac[], int ipRanges[]) - Constructor
 To init a Request object, you need to specifiy
 * **client**: Pointer to an EthernetClient
 * **mac**: Mac address to be used by the EthernetShield
@@ -23,7 +23,7 @@ To init a Request object, you need to specifiy
 ### bool  init()
 To be used within the setup function. It initialises the EthernetShield with the values passed in the constructor
 
-### bool    initRequest(String httpMethod, char *server, int severPort, String path)
+### bool    initClientHandler(String httpMethod, char *server, int severPort, String path)
 Set up the parameters to make an HTTP request. Currently it doesn't accept body for the request. It returns true if the client could be connected to the server. 
 
 * **httpMethod**: Http method to be used in the request: GET, POST, PUT, DELETE, PATCH

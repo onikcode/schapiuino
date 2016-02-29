@@ -1,19 +1,19 @@
 /*
-  Request.h - Library for create Http Requests.
+  ClientHandler.h - Library for create and send Http Requests.
   Created by Joan Ortega, jomaora@gmail.com Feb. 15, 2016.
   Released into the public domain.
 */
 
-#ifndef Request_h
-#define Request_h
+#ifndef ClientHandler_h
+#define ClientHandler_h
 
 #include "Arduino.h"
 #include <Ethernet.h>
 
-class Request
+class ClientHandler
 {
     public:
-        Request(EthernetClient *client, byte mac[], int ipRanges[]){
+        ClientHandler(EthernetClient *client, byte mac[], int ipRanges[]){
         	_client = client;
           for (int i = 0; i < 6; i++) {
             _mac[i] = mac[i];  
@@ -23,7 +23,7 @@ class Request
         }
 
         bool    init();
-        bool    initRequest(String httpMethod, char *server, int severPort, String path);
+        bool    initClientHandler(String httpMethod, char *server, int severPort, String path);
         void    addHeader(String header);
         const char* send();
         

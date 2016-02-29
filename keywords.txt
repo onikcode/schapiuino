@@ -1,6 +1,6 @@
-Request	KEYWORD1
+ClientHandler	KEYWORD1
 init	KEYWORD2
-initRequest	KEYWORD2
+initClientHandler	KEYWORD2
 addHeader	KEYWORD2
 send	KEYWORD2
 setPath	KEYWORD2
