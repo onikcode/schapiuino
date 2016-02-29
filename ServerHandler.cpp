@@ -27,32 +27,45 @@ bool ServerHandler::listenRequest() {
     if (!_client) {
         return false;
     } else {
+        Serial.println("server available");
         readRequest();
+        return true;
     }
+}
+
+void ServerHandler::sendResponse() {
+    _client.println("HTTP/1.1 200 OK");
+    _client.println("Content-Type: text/html");
+    _client.println("Connection: close");  // the connection will be closed after completion of the response
+    _client.println();
+    _client.println("<!DOCTYPE HTML>");
+    _client.println("<html>");
+    _client.println("connected");
+    _client.println("</html>");
+    delay(1);
+    _client.stop();
+
+    Serial.println("client disonnected");
+}
+
+const char* ServerHandler::getHttpMethod() {
+    return _requestLine.c_str();
+}
+
+const char* ServerHandler::getRequestHeaders() {
+    return _requestHeaders.c_str();
+}
+
+const char* ServerHandler::getRequestBody() {
+    return _requestBody.c_str();
 }
 
 void ServerHandler::readRequest() {
     boolean currentLineIsBlank = true;
     int countCLRF = 0;
-    while (_client.connected()) {
+    while (_client.connected() && !_requestReceived) {
         if (_client.available()) {
-            if (_client.available() == 0) {
-                _requestReceived = true;
-                break;  // nothing more on buffer, exit while
-            }
-
             char c = _client.read();
-            /*if (c == '\n' && currentLineIsBlank) {
-                countCLRF++;
-            }
-            if (c == '\n') {
-                currentLineIsBlank = true;
-                countCLRF++;
-            }
-            else if (c != '\r') {
-                currentLineIsBlank = false;
-                countCLRF = 0;
-            }*/
             if (c == '\n' || c == '\r') {
                 _returnCharCount++;
             } else {
@@ -76,6 +89,9 @@ void ServerHandler::readRequest() {
                     _requestBody.concat(c);
                     break;
             }
+        } else {
+            _requestReceived = true;
+            break;  // nothing more on buffer, exit while
         }
     }
 }

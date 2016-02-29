@@ -24,6 +24,11 @@ class ServerHandler
 
         void    init();
         bool    listenRequest();
+        void    sendResponse();
+
+        const char* getHttpMethod();
+        const char* getRequestHeaders();
+        const char* getRequestBody();
 
         void    enableLogs() { _activeLogs = true; }
         void    disableLogs() { _activeLogs = false; }
