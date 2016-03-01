@@ -16,9 +16,38 @@ void loop() {
     bool requestReceived = responseHandler.listenRequest();
 
     if (requestReceived) {
-        Serial.println(responseHandler.getHttpMethod());
-        Serial.println(responseHandler.getRequestHeaders());
-        Serial.println(responseHandler.getRequestBody());
-        responseHandler.sendResponse();
+        String method = responseHandler.getHttpMethod();
+        
+        if (responseHandler.getRequestPath().equals("/")) {
+          if (method.equals("GET")) {
+            responseHandler
+                .buildResponse(200)
+                .appendHeaderResponse("Content-Type: text/plain")
+                .appendHeaderResponse("Connection: close")
+                .appendBodyResponse("You have sent a request and we received.")
+                .send();
+          } if (method.equals("POST")) {
+            String bodyMessage = "You have sent a request and we received having as payload ";
+            bodyMessage.concat(responseHandler.getRequestBody());
+            responseHandler
+                .buildResponse(200)
+                .appendHeaderResponse("Content-Type: text/plain")
+                .appendHeaderResponse("Connection: close")
+                .appendBodyResponse(bodyMessage)
+                .send();
+          } else {
+            responseHandler
+                .buildResponse(405)
+                .appendHeaderResponse("Content-Type: text/plain")
+                .appendHeaderResponse("Connection: close")
+                .appendBodyResponse("Error: Only GET and POST have been implemented on this endpoint.")
+                .send();
+          }
+        } else {
+            responseHandler
+              .buildResponse(404)
+              .appendHeaderResponse("Connection: close")
+              .send();
+        }
     }
 }

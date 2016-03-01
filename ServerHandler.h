@@ -24,9 +24,16 @@ class ServerHandler
 
         void    init();
         bool    listenRequest();
-        void    sendResponse();
 
-        const char* getHttpMethod();
+        ServerHandler & buildResponse(int statusCode, String message = "");
+        ServerHandler & appendHeaderResponse(String header);
+        ServerHandler & appendBodyResponse(String body);
+
+        void    send();
+        void    sendHTMLBasicResponse(String message);
+
+        String      getHttpMethod();
+        String      getRequestPath();
         const char* getRequestHeaders();
         const char* getRequestBody();
 
@@ -36,6 +43,7 @@ class ServerHandler
     private:
         void    readRequest();
         void    resetRequest();
+        void    parseStatusCode(int status, String message = "");
 
         EthernetServer *_server;
         EthernetClient _client;
