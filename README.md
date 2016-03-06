@@ -14,11 +14,17 @@ It wrappes Ethernet setup, begin, connect, and send/receive request/response.
 
 ## API
 
+[Client Handler](#clientHandler)
+
+[Server Handler](#serverHandler)
+
+## <a name="clientHandler"></a>Client Handler
+
 ### ClientHandler(EthernetClient *client, byte mac[], int ipRanges[]) - Constructor
-To init a Request object, you need to specifiy
+To init a ClientHandler object, you need to specify
 * **client**: Pointer to an EthernetClient
 * **mac**: Mac address to be used by the EthernetShield
-* **ip**: Array containing the ranges to set the IP for the EthernetShield; Exemple [192, 0, 0, 1]
+* **ip**: Array containing the ranges to set the IP for the EthernetShield; Example [192, 0, 0, 1]
 
 ### bool  init()
 To be used within the setup function. It initialises the EthernetShield with the values passed in the constructor
@@ -46,7 +52,76 @@ Returns the Response's status code
 Return the Response's body
 
 ### void    enableLogs()
-Allow inner logs to be show in the serial moniteur
+Allow inner logs to be show in the serial monitor
 
 ###void    disableLogs()
-Disable inner logs to be show in the serial moniteur. This is the default behavior
+Disable inner logs to be show in the serial monitor. This is the default behavior
+
+## <a name="serverHandler"></a>Server Handler
+
+### ServerHandler(EthernetServer *server, byte mac[], int ipRanges[]) - Constructor
+To init a ClientHandler object, you need to specify:
+* **server**: Pointer to an EthernetServer object
+* **mac**: Mac address to be used by the EthernetShield
+* **ip**: Array containing the ranges to set the IP for the EthernetShield; Example [192, 0, 0, 1]
+
+### void    init()
+To be used within the setup function. It initialises the EthernetShield with the values passed in the constructor.
+
+### bool    listenRequest()
+Listen if a request is incoming. If it is, it blocks the process and start reading the request.
+When it returns true, the request is already read and ready to be analysed.
+
+### String      getHttpMethod()
+Returns the HTTP Method used by the incoming request.
+
+### String      getRequestPath()
+Returns the path used by the incoming request.
+
+### const char* getRequestHeaders()
+Returns all the headers given by the incoming request.
+
+### const char* getRequestBody()
+Returns the body (payload) sent in the incoming request.
+
+### ServerHandler & buildResponse(int statusCode, String message = "")
+Set the beginning of the response line, setting status code.
+* **status**: HTTP status code to send in the response.
+* **message**: (OPTIONAL): You can use another code (not in the http status codes list, in this case, set a message to explain it)
+
+### ServerHandler & appendHeaderResponse(String header)
+Add a header to the response.
+
+### ServerHandler & appendBodyResponse(String body)
+Add a body to the response if wanted. It should be called once!. If it is used, don't forget to add the "Content-Type" header before.
+
+### void    send()
+It ends the request line, close the connection and send the client the response.
+
+*buildResponse, appendHeaderResponse and appendBodyResponse are **chainable** methods, so you can write your code like this :*
+
+```
+responseHandler
+    .buildResponse(201)
+    .appendHeaderResponse("Content-Type: application/json")
+    .appendHeaderResponse("Connection: close")
+    .appendBodyResponse(bodyMessage)
+    .send();
+```
+
+### void    sendHTMLBasicResponse(String message)
+Builds a basic response (setting 200 as status code and sending a basic HTML template) with the message passed as parameter.
+
+### void    sendNonImplementedMethodResponse(String message)
+Builds a basic 405 error response.
+* **message**: (Optional): Message to be sent in the body. The default message is:  "Error: The used HTTP method have not been implemented on this endpoint."
+
+### void    sendNotFoundResponse(String message)
+Builds a basic 404 error response.
+* **message**: (Optional): Message to be sent in the body. The default message is:  "Error: Resource not found."
+
+### void    enableLogs()
+Allow inner logs to be show in the serial monitor
+
+###void    disableLogs()
+Disable inner logs to be show in the serial monitor. This is the default behavior
