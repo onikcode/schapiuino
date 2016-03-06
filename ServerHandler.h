@@ -31,6 +31,8 @@ class ServerHandler
 
         void    send();
         void    sendHTMLBasicResponse(String message);
+        void    sendNonImplementedMethodResponse(String message = "Error: The used HTTP method have not been implemented on this endpoint.");
+        void    sendNotFoundResponse(String message = "Error: Resource not found.");
 
         String      getHttpMethod();
         String      getRequestPath();

@@ -8,6 +8,7 @@ int ip[] = {192, 168, 1, 178};
 ServerHandler responseHandler(&server, mac, ip);
 
 void setup() {
+    Serial.begin(9600);
     responseHandler.enableLogs();
     responseHandler.init();
 }
@@ -44,10 +45,7 @@ void loop() {
                 .send();
           }
         } else {
-            responseHandler
-              .buildResponse(404)
-              .appendHeaderResponse("Connection: close")
-              .send();
+            responseHandler.sendNotFoundResponse();
         }
     }
 }

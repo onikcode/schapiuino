@@ -9,7 +9,6 @@
 #include "ServerHandler.h"
 
 void ServerHandler::init() {
-    Serial.begin(9600);
     while (!Serial) {
         ; // wait for serial port to connect. Needed for Leonardo only
     }
@@ -198,5 +197,29 @@ void ServerHandler::parseStatusCode(int status, String message) {
         default:
             _client.println(message);
             break;
+    }
+}
+
+void ServerHandler::sendNonImplementedMethodResponse(String message) {
+    if (_requestReceived) {
+        buildResponse(405)
+            .appendHeaderResponse("Content-Type: text/plain")
+            .appendHeaderResponse("Connection: close")
+            .appendBodyResponse(message)
+            .send();
+        delay(1);
+        _client.stop();
+    }
+}
+
+void ServerHandler::sendNotFoundResponse(String message) {
+    if (_requestReceived) {
+        buildResponse(405)
+            .appendHeaderResponse("Content-Type: text/plain")
+            .appendHeaderResponse("Connection: close")
+            .appendBodyResponse(message)
+            .send();
+        delay(1);
+        _client.stop();
     }
 }
