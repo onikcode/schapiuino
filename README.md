@@ -7,10 +7,17 @@ It wrappes Ethernet setup, begin, connect, and send/receive request/response.
 
 ## Contents
 
-- ClientHandler.h: the Request Class definition file.
-- ClientHandler.cpp: Request Class implementation file
+- ClientHandler.h: the Client Handler Class definition file to create HTTP requests.
+- ClientHandler.cpp: Client Handler implementation file
 - examples:
-	- GET: a basic example making a GET to a defined serverUrl, path, using header Accept: text/plain.
+	- ClientHandler_Basic_GET: a basic example making a GET to a defined serverUrl, path, using header Accept: text/plain.
+	- ClientHandler_LCD: a basic example making a GET to server and showing response on LCD.
+- ServerHandler.h: the Server Handler Class definition file to listen HTTP request and create responses.
+- ServerHandler.cpp: Server Handler implementation file
+- examples:
+    - Server_Basic: Basic example that responses avec a basic HTML file on GET and POST method
+    - Server_Servo: Example exposing an API to manage a Servo Motor.
+
 
 ## API
 
