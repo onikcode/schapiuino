@@ -1,6 +1,7 @@
-Request	KEYWORD1
+ClientHandler	KEYWORD1
+ServerHandler	KEYWORD1
 init	KEYWORD2
-initRequest	KEYWORD2
+initClientHandler	KEYWORD2
 addHeader	KEYWORD2
 send	KEYWORD2
 setPath	KEYWORD2
@@ -9,3 +10,14 @@ getResponseStatusCode	KEYWORD2
 getResponseBody	KEYWORD2
 enableLogs	KEYWORD2
 disableLogs	KEYWORD2
+listenRequest	KEYWORD2
+buildResponse	KEYWORD2
+appendHeaderResponse	KEYWORD2
+appendBodyResponse	KEYWORD2
+sendHTMLBasicResponse	KEYWORD2
+sendNotFoundResponse	KEYWORD2
+sendNonImplementedMethodResponse	KEYWORD2
+getHttpMethod	KEYWORD2
+getRequestPath	KEYWORD2
+getRequestHeaders	KEYWORD2
+getRequestBody	KEYWORD2

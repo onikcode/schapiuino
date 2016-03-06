@@ -1,17 +1,16 @@
 /*
-  Request.cpp - Library for create Http Requests.
+  ClientHandler.cpp - Library for create Http Requests.
   Created by Joan Ortega, jomaora@gmail.com Feb. 15, 2016.
   Released into the public domain.
 */
 
 #include "Arduino.h"
 #include <Ethernet.h>
-#include "Request.h"
+#include "ClientHandler.h"
 
-bool Request::init() {
+bool ClientHandler::init() {
   _requestReady = false;
   String result = "";
-  Serial.begin(9600);
    while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
   }
@@ -28,7 +27,7 @@ bool Request::init() {
   return (beginOK != 0);
 }
 
-bool Request::initRequest(String httpMethod, char *server, int serverPort, String path) {
+bool ClientHandler::initClientHandler(String httpMethod, char *server, int serverPort, String path) {
   _server = server;
   _path = path;
   resetRequest();
@@ -58,13 +57,13 @@ bool Request::initRequest(String httpMethod, char *server, int serverPort, Strin
   return _requestReady;
 }
 
-void Request::addHeader(String header) {
+void ClientHandler::addHeader(String header) {
   if (_requestReady) {
     _client->println(header);  
   }
 }
 
-const char* Request::send() {
+const char* ClientHandler::send() {
   if (_requestReady) {
     _client->println("Connection: close");
     _client->println();
@@ -89,11 +88,11 @@ const char* Request::send() {
     return _body.c_str();
   }
   else {
-    return "Request is not ready";
+    return "Request is not ready to be sent";
   }
 }
 
-void Request::buildResponse() {
+void ClientHandler::buildResponse() {
   // values needed before reading response
   _returnCharCount = 0; _readingStatus = true;  _readingheaders = false;  _readingBody = false;
   while(!_receivedResponse) {
@@ -107,7 +106,7 @@ void Request::buildResponse() {
   }
 }
 
-void Request::readingResponse(char c) {
+void ClientHandler::readingResponse(char c) {
   if (c == '\n' || c == '\r') {
     _returnCharCount++;
   } else {
@@ -132,7 +131,7 @@ void Request::readingResponse(char c) {
   }
 }
 
-int Request::getResponseStatusCode() {
+int ClientHandler::getResponseStatusCode() {
   if (_receivedResponse) {
     int blankSpaceIndex = _status.indexOf(" ") + 1;
     String statusCode = _status.substring(blankSpaceIndex, blankSpaceIndex + 3);
@@ -142,7 +141,7 @@ int Request::getResponseStatusCode() {
   }
 }
 
-const char* Request::getResponseBody() {
+const char* ClientHandler::getResponseBody() {
   if (_receivedResponse) {
     return _body.c_str();  
   } else {
@@ -150,7 +149,7 @@ const char* Request::getResponseBody() {
   }
 }
 
-void Request::resetRequest() {
+void ClientHandler::resetRequest() {
   _receivedResponse = false;  // setting the flag that indicates the response recpetion to false;
   _body = "";
   _status = "";
