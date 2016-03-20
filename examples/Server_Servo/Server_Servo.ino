@@ -25,13 +25,16 @@ void loop() {
     bool requestReceived = responseHandler.listenRequest();
 
     if (requestReceived) {
+        Serial.println(responseHandler.getHttpMethod());
+        Serial.println(responseHandler.getRequestPath());
         String method = responseHandler.getHttpMethod();
-
         if (responseHandler.getRequestPath().equals("/servomotor/angle")) {
           if (method.equals("GET")) {
             bodyMessage = "{\"angle\": ";  bodyMessage.concat(angle);  bodyMessage.concat("}");
             responseHandler
                 .buildResponse(200)
+                .appendHeaderResponse("Access-Control-Allow-Origin: *")
+                .appendHeaderResponse("Access-Control-Allow-Credentials: true")
                 .appendHeaderResponse("Content-Type: application/json")
                 .appendHeaderResponse("Connection: close")
                 .appendBodyResponse(bodyMessage)
@@ -48,6 +51,8 @@ void loop() {
 
             responseHandler
                 .buildResponse(201)
+                .appendHeaderResponse("Access-Control-Allow-Origin: *")
+                .appendHeaderResponse("Access-Control-Allow-Credentials: true")
                 .appendHeaderResponse("Content-Type: text/plain")
                 .appendHeaderResponse("Connection: close")
                 .appendBodyResponse(bodyMessage)
@@ -58,15 +63,19 @@ void loop() {
           }
         }
         else if (responseHandler.getRequestPath().equals("/servomotor/reset")) {
-          if (method.equals("POST")) {
+          if (method.equals("POST") || method.equals("OPTIONS")) {
             angle = 0;
             bodyMessage = "{\"angle\": ";  bodyMessage.concat(angle);  bodyMessage.concat("}");
             responseHandler
                 .buildResponse(201)
+                .appendHeaderResponse("Access-Control-Allow-Origin: *")
+                .appendHeaderResponse("Access-Control-Allow-Credentials: true")
                 .appendHeaderResponse("Content-Type: application/json")
-                .appendHeaderResponse("Connection: close")
-                .appendBodyResponse(bodyMessage)
-                .send();
+                .appendHeaderResponse("Connection: close");
+            if (method.equals("POST")) {
+                responseHandler.appendBodyResponse(bodyMessage);
+            }
+            responseHandler.send();
           } else {
             responseHandler.sendNonImplementedMethodResponse();
           }
@@ -77,5 +86,4 @@ void loop() {
     }
     myServo.write(angle);
     delay(1000);
-
 }
