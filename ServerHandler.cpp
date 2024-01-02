@@ -115,11 +115,12 @@ const char* ServerHandler::getRequestBody() {
 }
 
 void ServerHandler::readRequest() {
-    boolean currentLineIsBlank = true;
-    int countCLRF = 0;
+    // boolean currentLineIsBlank = true; unused variable
+    // int countCLRF = 0; unused variable
     while (_client.connected() && !_requestReceived) {
-        if (_client.available()) {
+        if (_client.available()) {         
             char c = _client.read();
+            Serial.write(c);  
             if (c == '\n' || c == '\r') {
                 _returnCharCount++;
             } else {
@@ -131,7 +132,6 @@ void ServerHandler::readRequest() {
             if (_returnCharCount == 4) {
                 _readingStatus = 2;
             }
-
             switch (_readingStatus) {
                 case 0:
                     _requestLine.concat(c);
@@ -148,7 +148,7 @@ void ServerHandler::readRequest() {
         } else {
             _requestReceived = true;
         }
-    }
+    }  
 }
 
 void ServerHandler::resetRequest() {

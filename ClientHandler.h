@@ -47,7 +47,7 @@ class ClientHandler
         char*  _server;
         int    _serverPort;
         String _path;
-        String _headers[];
+        String _headers[6];
 
         bool _requestReady = false;
         bool _receivedResponse = false;
